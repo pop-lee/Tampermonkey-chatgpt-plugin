@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  调整特定元素的样式
-// @author       您的名字
+// @author       liyunpeng@live.com
 // @match        https://*.openai.com/*
 // @grant        none
 // ==/UserScript==
