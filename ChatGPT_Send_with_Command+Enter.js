@@ -2,7 +2,7 @@
 // @name         ChatGPT Send with Command+Enter
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  Send messages in ChatGPT using Command+Enter instead of Enter alone.
+// @description  Send messages in ChatGPT using Command+Enter instead of Enter alone, and insert newline at current cursor position with Enter.
 // @author       liyunpeng@live.com
 // @match        https://*.openai.com/*
 // @grant        none
@@ -11,30 +11,45 @@
 (function() {
     'use strict';
 
-    const chatInputSelector = '#prompt-textarea'; // CSS selector for the ChatGPT input box
-    const chatInput = document.querySelector(chatInputSelector); // 选择你想要监听的输入框
+    const chatInputSelector = 'textarea[id="prompt-textarea"]'; // CSS selector for the ChatGPT input boxes
 
-    if(chatInput) {
-        // Event listener to intercept the Enter key
-        chatInput.addEventListener('keydown', function(e) {
-            // 检查按下的是否是回车键
-            if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey) {
-                debugger;
-                console.log("Enter at current position");
-                e.preventDefault(); // 防止默认行为
-                e.stopPropagation();
-                // 获取光标当前位置
-                const cursorPosition = chatInput.selectionStart;
-                const textBeforeCursor = chatInput.value.substring(0, cursorPosition);
-                const textAfterCursor = chatInput.value.substring(cursorPosition);
+    function handleKeydown(e) {
+        if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey) {
+            console.log("Enter at current position");
+            e.preventDefault(); // 防止默认行为
+            e.stopPropagation(); // 防止事件冒泡
 
-                // 在光标位置插入换行符
-                chatInput.value = textBeforeCursor + '\n' + textAfterCursor;
+            // 获取光标当前位置
+            const cursorPosition = e.target.selectionStart;
+            const textBeforeCursor = e.target.value.substring(0, cursorPosition);
+            const textAfterCursor = e.target.value.substring(cursorPosition);
 
-                // 将光标移动到插入换行符后的位置
-                chatInput.selectionStart = cursorPosition + 1;
-                chatInput.selectionEnd = cursorPosition + 1;
-            }
-        });
+            // 在光标位置插入换行符
+            e.target.value = textBeforeCursor + '\n' + textAfterCursor;
+
+            // 将光标移动到插入换行符后的位置
+            e.target.selectionStart = cursorPosition + 1;
+            e.target.selectionEnd = cursorPosition + 1;
+        }
     }
+
+    // 设置MutationObserver来监听DOM变化
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            document.querySelectorAll(chatInputSelector).forEach(chatInput => {
+                chatInput.removeEventListener('keydown', handleKeydown);
+                chatInput.addEventListener('keydown', handleKeydown);
+            });
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // 初始绑定
+    document.querySelectorAll(chatInputSelector).forEach(chatInput => {
+        chatInput.addEventListener('keydown', handleKeydown);
+    });
 })();
