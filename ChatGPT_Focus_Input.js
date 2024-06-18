@@ -4,7 +4,7 @@
 // @version      0.1
 // @description  Automatically set focus to the ChatGPT input box when switching back to the tab.
 // @author       liyunpeng@live.com
-// @match        https://*.openai.com/*
+// @match        https://*.chatgpt.com/*
 // @grant        none
 // ==/UserScript==
 

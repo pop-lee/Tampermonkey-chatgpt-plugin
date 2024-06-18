@@ -4,7 +4,7 @@
 // @version      0.1
 // @description  Send messages in ChatGPT using Command+Enter instead of Enter alone.
 // @author       liyunpeng@live.com
-// @match        https://*.openai.com/*
+// @match        https://*.chatgpt.com/*
 // @grant        none
 // ==/UserScript==
 
