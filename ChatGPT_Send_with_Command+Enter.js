@@ -12,36 +12,49 @@
     'use strict';
 
     const chatInputSelector = 'textarea[id="prompt-textarea"]'; // CSS selector for the ChatGPT input boxes
+    let isIMEActive = false;
 
     function handleKeydown(e) {
         if (e.key === 'Enter') {
-            if(!e.metaKey && !e.ctrlKey) {
-                console.log("Enter at current position");
-                e.preventDefault(); // 防止默认行为
-                e.stopPropagation(); // 防止事件冒泡
-
-                // 获取光标当前位置
-                const cursorPosition = e.target.selectionStart;
-                const textBeforeCursor = e.target.value.substring(0, cursorPosition);
-                const textAfterCursor = e.target.value.substring(cursorPosition);
-
-                // 在光标位置插入换行符
-                e.target.value = textBeforeCursor + '\n' + textAfterCursor;
-
-                // 将光标移动到插入换行符后的位置
-                e.target.selectionStart = cursorPosition + 1;
-                e.target.selectionEnd = cursorPosition + 1;
+            if (isIMEActive) {
+                console.log("Enter pressed while IME is active");
             } else {
-                copyInputContentToClipboard(e);
+                if (!e.metaKey && !e.ctrlKey) {
+                    console.log("Enter at current position");
+                    e.preventDefault(); // Prevent default behavior
+                    e.stopPropagation(); // Stop event propagation
+
+                    // Get the cursor position
+                    const cursorPosition = e.target.selectionStart;
+                    const textBeforeCursor = e.target.value.substring(0, cursorPosition);
+                    const textAfterCursor = e.target.value.substring(cursorPosition);
+
+                    // Insert newline at cursor position
+                    e.target.value = textBeforeCursor + '\n' + textAfterCursor;
+
+                    // Move cursor to the position after the newline
+                    e.target.selectionStart = cursorPosition + 1;
+                    e.target.selectionEnd = cursorPosition + 1;
+                } else {
+                    copyInputContentToClipboard(e);
+                }
             }
         }
     }
 
+    function handleCompositionStart(e) {
+        isIMEActive = true;
+    }
+
+    function handleCompositionEnd(e) {
+        isIMEActive = false;
+    }
+
     function copyInputContentToClipboard(e) {
-        // 使用 e.target 获取当前触发事件的元素
+        // Use e.target to get the current element that triggered the event
         const chatInput = e.target;
 
-        // 复制文本到剪贴板
+        // Copy text to clipboard
         navigator.clipboard.writeText(chatInput.value)
             .then(function() {
                 console.log('Text copied to clipboard');
@@ -51,12 +64,17 @@
             });
     }
 
-    // 设置MutationObserver来监听DOM变化
+    // Set up MutationObserver to monitor DOM changes
     const observer = new MutationObserver(mutations => {
         mutations.forEach(mutation => {
             document.querySelectorAll(chatInputSelector).forEach(chatInput => {
                 chatInput.removeEventListener('keydown', handleKeydown);
+                chatInput.removeEventListener('compositionstart', handleCompositionStart);
+                chatInput.removeEventListener('compositionend', handleCompositionEnd);
+
                 chatInput.addEventListener('keydown', handleKeydown);
+                chatInput.addEventListener('compositionstart', handleCompositionStart);
+                chatInput.addEventListener('compositionend', handleCompositionEnd);
             });
         });
     });
@@ -66,8 +84,10 @@
         subtree: true
     });
 
-    // 初始绑定
+    // Initial binding
     document.querySelectorAll(chatInputSelector).forEach(chatInput => {
         chatInput.addEventListener('keydown', handleKeydown);
+        chatInput.addEventListener('compositionstart', handleCompositionStart);
+        chatInput.addEventListener('compositionend', handleCompositionEnd);
     });
 })();
