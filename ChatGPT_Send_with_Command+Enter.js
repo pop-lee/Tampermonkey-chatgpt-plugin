@@ -35,6 +35,10 @@
                     // Move cursor to the position after the newline
                     e.target.selectionStart = cursorPosition + 1;
                     e.target.selectionEnd = cursorPosition + 1;
+
+                    // 手动触发输入事件，强制浏览器重新计算输入框高度
+                    const event = new Event('input', { bubbles: true });
+                    e.target.dispatchEvent(event);
                 } else {
                     copyInputContentToClipboard(e);
                 }
