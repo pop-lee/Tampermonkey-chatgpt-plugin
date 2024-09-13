@@ -11,7 +11,7 @@
 (function() {
     'use strict';
 
-    const chatInputSelector = 'textarea[id="prompt-textarea"]';
+    const chatInputSelector = '#prompt-textarea';
     let hasLeftPage = false; // 标志用于检测是否离开过当前页面
 
     function setFocusToChatInput() {

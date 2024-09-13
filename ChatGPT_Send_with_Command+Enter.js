@@ -11,7 +11,7 @@
 (function() {
     'use strict';
 
-    const chatInputSelector = 'textarea[id="prompt-textarea"]'; // CSS selector for the ChatGPT input boxes
+    const chatInputSelector = '#prompt-textarea'; // CSS selector for the ChatGPT input boxes
     let isIMEActive = false;
 
     function handleKeydown(e) {

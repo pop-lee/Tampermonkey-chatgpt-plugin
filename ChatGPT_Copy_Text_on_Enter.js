@@ -11,7 +11,7 @@
 (function() {
     'use strict';
 
-    const chatInputSelector = 'textarea[id="prompt-textarea"]'; // CSS selector for the ChatGPT input boxes
+    const chatInputSelector = '#prompt-textarea'; // CSS selector for the ChatGPT input boxes
 
     function handleKeydown(e) {
         // 检查按下的是否是回车键
