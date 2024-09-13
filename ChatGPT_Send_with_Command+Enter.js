@@ -19,32 +19,36 @@
 
         // 确保只处理指定输入框中的 Enter 键事件
         if (e.key === 'Enter' && chatInput && e.target === chatInput) {
-            if (!isIMEActive && !e.metaKey && !e.ctrlKey) {
-                console.log("Enter at current position");
-                e.preventDefault(); // 阻止默认行为，如直接发送消息
-                e.stopPropagation(); // 阻止事件传播到其他监听器
-
-                const selection = window.getSelection();
-                const range = selection.getRangeAt(0);
-
-                // 创建一个文本节点，用于插入换行符
-                const br = document.createElement('br');
-
-                // 插入换行符并调整光标位置
-                range.deleteContents(); // 删除当前选中内容
-                range.insertNode(br); // 插入换行符
-
-                // 将光标移动到 <br> 之后
-                range.setStartAfter(br);
-                range.setEndAfter(br);
-                selection.removeAllRanges(); // 清除当前所有范围
-                selection.addRange(range); // 添加新的光标范围
-
-                // 手动触发输入事件以更新输入框高度
-                const inputEvent = new Event('input', { bubbles: true });
-                chatInput.dispatchEvent(inputEvent);
-            } else {
+            // 判断是否按下了 Meta（Command）或 Ctrl 键
+            if (e.metaKey || e.ctrlKey) {
+                // Command + Enter 或 Ctrl + Enter 触发复制到剪贴板
                 copyInputContentToClipboard(e);
+            } else {
+                // 普通的 Enter 键处理换行
+                if (!isIMEActive) {
+                    e.preventDefault(); // 阻止默认行为，如直接发送消息
+                    e.stopPropagation(); // 阻止事件传播到其他监听器
+
+                    const selection = window.getSelection();
+                    const range = selection.getRangeAt(0);
+
+                    // 创建一个文本节点，用于插入换行符
+                    const br = document.createElement('br');
+
+                    // 插入换行符并调整光标位置
+                    range.deleteContents(); // 删除当前选中内容
+                    range.insertNode(br); // 插入换行符
+
+                    // 将光标移动到 <br> 之后
+                    range.setStartAfter(br);
+                    range.setEndAfter(br);
+                    selection.removeAllRanges(); // 清除当前所有范围
+                    selection.addRange(range); // 添加新的光标范围
+
+                    // 手动触发输入事件以更新输入框高度
+                    const inputEvent = new Event('input', { bubbles: true });
+                    chatInput.dispatchEvent(inputEvent);
+                }
             }
         }
     }
