@@ -14,6 +14,28 @@
     const chatInputSelector = '#prompt-textarea'; // CSS selector for the ChatGPT input boxes
     let isIMEActive = false;
 
+    function getChatInputText(chatInput) {
+        // 获取输入框的文本内容，根据元素类型处理
+        if (chatInput.value !== undefined) {
+            // 如果是 textarea
+            return chatInput.value;
+        } else {
+            // 如果是 contenteditable div
+            return chatInput.innerText;
+        }
+    }
+
+    function setChatInputText(chatInput, text) {
+        // 设置输入框的文本内容，根据元素类型处理
+        if (chatInput.value !== undefined) {
+            // 如果是 textarea
+            chatInput.value = text;
+        } else {
+            // 如果是 contenteditable div
+            chatInput.innerText = text;
+        }
+    }
+
     function handleKeydown(e) {
         // 确保只处理输入框中的 Enter 键
         const chatInput = document.querySelector(chatInputSelector);
@@ -26,21 +48,29 @@
                     e.preventDefault(); // Prevent default behavior
                     e.stopPropagation(); // Stop event propagation
 
-                    // Get the cursor position
-                    const cursorPosition = chatInput.selectionStart;
-                    const textBeforeCursor = chatInput.value.substring(0, cursorPosition);
-                    const textAfterCursor = chatInput.value.substring(cursorPosition);
+                    // 获取光标位置
+                    const selection = window.getSelection();
+                    const range = selection.getRangeAt(0);
+                    const cursorPosition = range.startOffset;
 
-                    // Insert newline at cursor position
-                    chatInput.value = textBeforeCursor + '\n' + textAfterCursor;
+                    // 获取输入框内容
+                    const text = getChatInputText(chatInput);
+                    const textBeforeCursor = text.substring(0, cursorPosition);
+                    const textAfterCursor = text.substring(cursorPosition);
 
-                    // Move cursor to the position after the newline
-                    chatInput.selectionStart = cursorPosition + 1;
-                    chatInput.selectionEnd = cursorPosition + 1;
+                    // 在光标位置插入换行符
+                    const newText = textBeforeCursor + '\n' + textAfterCursor;
+                    setChatInputText(chatInput, newText);
+
+                    // 移动光标到换行符之后
+                    range.setStart(range.startContainer, cursorPosition + 1);
+                    range.setEnd(range.startContainer, cursorPosition + 1);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
 
                     // 手动触发输入事件，强制浏览器重新计算输入框高度
-                    const event = new Event('input', { bubbles: true });
-                    chatInput.dispatchEvent(event);
+                    const inputEvent = new Event('input', { bubbles: true });
+                    chatInput.dispatchEvent(inputEvent);
                 } else {
                     copyInputContentToClipboard(e);
                 }
@@ -61,7 +91,8 @@
         const chatInput = e.target;
 
         // Copy text to clipboard
-        navigator.clipboard.writeText(chatInput.value)
+        const text = getChatInputText(chatInput);
+        navigator.clipboard.writeText(text)
             .then(function() {
                 console.log('Text copied to clipboard');
             })
